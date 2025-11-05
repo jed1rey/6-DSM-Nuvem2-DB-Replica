@@ -1,0 +1,46 @@
+1- Inicializar os containers do MySQL
+Certifique-se de que não há containers MySQL rodando nas portas 3307/3308.
+
+
+2- Suba apenas o primário primeiro:
+docker compose up -d mysql-primary
+
+
+3- Suba a réplica:
+docker compose up -d mysql-replica
+
+
+4- Verifique os logs:
+docker logs mysql-primary
+docker logs mysql-replica
+
+
+5- Certifique-se de que ambos iniciaram sem erros.
+
+
+6- Configurar a replicação
+
+Entre no container da réplica:
+docker exec -it mysql-replica mysql -uroot -proot
+
+
+
+No MySQL da réplica, execute:
+
+STOP REPLICA;
+
+RESET REPLICA ALL;
+
+CHANGE REPLICATION SOURCE TO
+    SOURCE_HOST='mysql-primary',
+    SOURCE_USER='replica_user',
+    SOURCE_PASSWORD='replica_pass',
+    SOURCE_AUTO_POSITION=1,
+    GET_SOURCE_PUBLIC_KEY=1;
+
+START REPLICA;
+
+SHOW REPLICA STATUS\G
+
+
+Verifique se Replica_IO_Running: Yes e Replica_SQL_Running: Yes.
